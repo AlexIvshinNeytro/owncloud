@@ -1,13 +1,5 @@
 version: '3'
 
-volumes:
-  files:
-    driver: local
-  mysql:
-    driver: local
-  backup:
-    driver: local
-
 services:
   db:
     image: mariadb:latest
