@@ -1,0 +1,47 @@
+version: '3'
+
+volumes:
+  files:
+    driver: local
+  mysql:
+    driver: local
+  backup:
+    driver: local
+
+services:
+  db:
+    image: mariadb:latest
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=$DOCKER_PASSWORD
+      - MYSQL_USERNAME=$DOCKER_ADMIN
+      - MYSQL_DATABASE=owncloud
+      - MYSQL_MAX_ALLOWED_PACKET=10M
+      - MYSQL_INNODB_LOG_FILE_SIZE=12M
+    healthcheck:
+        test: ["CMD", "/usr/bin/healthcheck"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+    volumes:
+      - ${PWD}/db:/var/lib/mysql
+      - ${PWD}/backup:/var/lib/backup
+       
+  owncloud:
+    image: owncloud:10
+    restart: always
+    ports:
+      - 8000:80
+    environment:
+      - OWNCLOUD_DB_TYPE=mysql
+      - OWNCLOUD_DB_NAME=owncloud
+      - OWNCLOUD_ADMIN_USERNAME=$DOCKER_ADMIN
+      - OWNCLOUD_ADMIN_PASSWORD=$DOCKER_PASSWORD
+    links:
+      - db  
+    volumes:
+      - ${PWD}/owncloud:/var/www/html
+    depends_on:
+      - db
+   
+
